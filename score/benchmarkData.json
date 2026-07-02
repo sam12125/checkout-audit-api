@@ -1,0 +1,17 @@
+{
+  "Shopify": {
+    "avgMobileScore": 72,
+    "avgCheckout": 82,
+    "avgTrust": 76
+  },
+  "WooCommerce": {
+    "avgMobileScore": 63,
+    "avgCheckout": 68,
+    "avgTrust": 71
+  },
+  "BigCommerce": {
+    "avgMobileScore": 70,
+    "avgCheckout": 80,
+    "avgTrust": 74
+  }
+}
