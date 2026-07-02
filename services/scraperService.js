@@ -46,13 +46,18 @@ async function scanStore(url, monthlyTraffic = 50000, aov = 80) {
     // Open Homepage
     //------------------------------------
 
-    await page.goto(url, {
-      waitUntil: "domcontentloaded",
-    });
+   await page.goto(url, {
+  waitUntil: "domcontentloaded",
+  timeout: 60000,
+});
 
-    await page.waitForSelector("body", {
-      timeout: 10000,
-    });
+try {
+  await page.waitForLoadState("networkidle", { timeout: 60000 });
+} catch (e) {
+  // ignore network idle timeout (common on Shopify/React sites)
+}
+
+ 
 
     //------------------------------------
     // Homepage Checks (Parallel)
@@ -103,20 +108,20 @@ async function scanStore(url, monthlyTraffic = 50000, aov = 80) {
 
     try {
       if (!pagespeed.mobile) {
-    pagespeed.mobile = {
-        score: 0,
-        metrics: {},
-        opportunities: []
-    };
-}
+        pagespeed.mobile = {
+          score: 0,
+          metrics: {},
+          opportunities: [],
+        };
+      }
 
-if (!pagespeed.desktop) {
-    pagespeed.desktop = {
-        score: 0,
-        metrics: {},
-        opportunities: []
-    };
-}
+      if (!pagespeed.desktop) {
+        pagespeed.desktop = {
+          score: 0,
+          metrics: {},
+          opportunities: [],
+        };
+      }
     } catch (err) {
       pagespeed = {
         success: false,
