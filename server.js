@@ -31,13 +31,6 @@ app.use(express.json({ limit: "10mb" }));
    (prevents Render hanging)
 ------------------------------*/
 app.use((req, res, next) => {
-  res.setTimeout(120000, () => {
-    console.log("❌ Request timed out");
-    res.status(408).json({
-      success: false,
-      error: "Request timeout",
-    });
-  });
   next();
 });
 

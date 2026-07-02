@@ -122,7 +122,7 @@ async function pageSpeedCheck(url) {
     }
   }
 
-  // Desktop
+  // Desktop 
 
   try {
     result.desktop = await getPageSpeed(url, "desktop");
