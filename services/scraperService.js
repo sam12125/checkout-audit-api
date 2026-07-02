@@ -102,7 +102,21 @@ async function scanStore(url, monthlyTraffic = 50000, aov = 80) {
     let pagespeed;
 
     try {
-      pagespeed = await pageSpeedPromise;
+      if (!pagespeed.mobile) {
+    pagespeed.mobile = {
+        score: 0,
+        metrics: {},
+        opportunities: []
+    };
+}
+
+if (!pagespeed.desktop) {
+    pagespeed.desktop = {
+        score: 0,
+        metrics: {},
+        opportunities: []
+    };
+}
     } catch (err) {
       pagespeed = {
         success: false,

@@ -11,7 +11,7 @@ function scoreAudit(data){
     // Mobile Speed
     //-----------------------
 
-    const mobileScore = data.pagespeed.mobile.score;
+const mobileScore = data?.pagespeed?.mobile?.score ?? 0;
 
     if(mobileScore < 50){
 

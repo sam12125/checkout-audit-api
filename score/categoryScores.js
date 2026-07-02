@@ -2,10 +2,10 @@ module.exports = function getCategoryScores(data) {
 
     return {
 
-        performance:
-            data.pagespeed.success
-                ? data.pagespeed.mobile.score
-                : 0,
+       performance:
+    data.pagespeed.success
+        ? data.pagespeed.mobile.score
+        : 0,
 
         productExperience:
             (

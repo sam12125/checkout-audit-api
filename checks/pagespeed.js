@@ -3,111 +3,92 @@ const axios = require("axios");
 const API_KEY = process.env.GOOGLE_API_KEY;
 
 const API_URL =
-    "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
+  "https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed";
 
 // -------------------------
 // Fetch PageSpeed
 // -------------------------
 
 async function getPageSpeed(url, strategy) {
+  const response = await axios.get(API_URL, {
+    params: {
+      url,
+      strategy,
+      key: API_KEY,
+    },
+  });
 
-    const response = await axios.get(API_URL, {
-        params: {
-            url,
-            strategy,
-            key: API_KEY
-        }
+  const lighthouse = response.data.lighthouseResult;
+  const audits = lighthouse.audits;
+
+  // -------------------------
+  // Performance Opportunities
+  // -------------------------
+
+  const opportunities = [];
+
+  const opportunityKeys = [
+    "render-blocking-resources",
+
+    "unused-css-rules",
+
+    "unused-javascript",
+
+    "modern-image-formats",
+
+    "offscreen-images",
+
+    "uses-text-compression",
+
+    "server-response-time",
+
+    "uses-responsive-images",
+
+    "efficient-animated-content",
+  ];
+
+  opportunityKeys.forEach((key) => {
+    const audit = audits[key];
+
+    if (!audit) return;
+
+    opportunities.push({
+      title: audit.title,
+
+      description: audit.description,
+
+      score: audit.score,
+
+      displayValue: audit.displayValue || null,
+
+      savingsMs: audit.details?.overallSavingsMs || 0,
+
+      savingsBytes: audit.details?.overallSavingsBytes || 0,
     });
+  });
 
-    const lighthouse = response.data.lighthouseResult;
-    const audits = lighthouse.audits;
+  return {
+    score: Math.round(lighthouse.categories.performance.score * 100),
 
-    // -------------------------
-    // Performance Opportunities
-    // -------------------------
+    metrics: {
+      firstContentfulPaint:
+        audits["first-contentful-paint"]?.displayValue || null,
 
-    const opportunities = [];
+      largestContentfulPaint:
+        audits["largest-contentful-paint"]?.displayValue || null,
 
-    const opportunityKeys = [
+      speedIndex: audits["speed-index"]?.displayValue || null,
 
-        "render-blocking-resources",
+      totalBlockingTime: audits["total-blocking-time"]?.displayValue || null,
 
-        "unused-css-rules",
+      cumulativeLayoutShift:
+        audits["cumulative-layout-shift"]?.displayValue || null,
 
-        "unused-javascript",
+      interactive: audits["interactive"]?.displayValue || null,
+    },
 
-        "modern-image-formats",
-
-        "offscreen-images",
-
-        "uses-text-compression",
-
-        "server-response-time",
-
-        "uses-responsive-images",
-
-        "efficient-animated-content"
-
-    ];
-
-    opportunityKeys.forEach(key => {
-
-        const audit = audits[key];
-
-        if (!audit) return;
-
-        opportunities.push({
-
-            title: audit.title,
-
-            description: audit.description,
-
-            score: audit.score,
-
-            displayValue: audit.displayValue || null,
-
-            savingsMs:
-                audit.details?.overallSavingsMs || 0,
-
-            savingsBytes:
-                audit.details?.overallSavingsBytes || 0
-
-        });
-
-    });
-
-    return {
-
-        score: Math.round(
-            lighthouse.categories.performance.score * 100
-        ),
-
-        metrics: {
-
-            firstContentfulPaint:
-                audits["first-contentful-paint"]?.displayValue || null,
-
-            largestContentfulPaint:
-                audits["largest-contentful-paint"]?.displayValue || null,
-
-            speedIndex:
-                audits["speed-index"]?.displayValue || null,
-
-            totalBlockingTime:
-                audits["total-blocking-time"]?.displayValue || null,
-
-            cumulativeLayoutShift:
-                audits["cumulative-layout-shift"]?.displayValue || null,
-
-            interactive:
-                audits["interactive"]?.displayValue || null
-
-        },
-
-        opportunities
-
-    };
-
+    opportunities,
+  };
 }
 
 // -------------------------
@@ -115,57 +96,55 @@ async function getPageSpeed(url, strategy) {
 // -------------------------
 
 async function pageSpeedCheck(url) {
+  const result = {
+    success: true,
 
-    const result = {
+    mobile: null,
 
-        success: true,
+    desktop: null,
 
-        mobile: null,
+    error: null,
+  };
 
-        desktop: null,
+  // Mobile
 
-        error: null
+  try {
+    result.mobile = await getPageSpeed(url, "mobile");
+  } catch (err) {
+    console.log("❌ Mobile PageSpeed Failed");
 
-    };
+    console.log("Message:", err.message);
+    console.log("Code:", err.code);
 
-    // Mobile
-
-    try {
-
-        result.mobile = await getPageSpeed(url, "mobile");
-
-    } catch (err) {
-
-        console.log("❌ Mobile PageSpeed Failed");
-
-        console.log(err.response?.data || err.message);
-
+    if (err.response) {
+      console.log("Status:", err.response.status);
+      console.dir(err.response.data, { depth: null });
     }
+  }
 
-    // Desktop
+  // Desktop
 
-    try {
+  try {
+    result.desktop = await getPageSpeed(url, "desktop");
+  } catch (err) {
+    console.log("❌ Desktop PageSpeed Failed");
 
-        result.desktop = await getPageSpeed(url, "desktop");
+    console.log("Message:", err.message);
+    console.log("Code:", err.code);
 
-    } catch (err) {
-
-        console.log("❌ Desktop PageSpeed Failed");
-
-        console.log(err.response?.data || err.message);
-
+    if (err.response) {
+      console.log("Status:", err.response.status);
+      console.dir(err.response.data, { depth: null });
     }
+  }
 
-    if (!result.mobile && !result.desktop) {
+  if (!result.mobile && !result.desktop) {
+    result.success = false;
 
-        result.success = false;
+    result.error = "Unable to retrieve PageSpeed data.";
+  }
 
-        result.error = "Unable to retrieve PageSpeed data.";
-
-    }
-
-    return result;
-
+  return result;
 }
 
 module.exports = pageSpeedCheck;

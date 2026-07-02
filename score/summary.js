@@ -12,9 +12,8 @@ module.exports = function getSummary(data) {
     if (data.trust.ssl)
         strengths.push("SSL enabled");
 
-    if (data.pagespeed.success &&
-        data.pagespeed.mobile.score >= 80)
-        strengths.push("Fast mobile speed");
+    if ((data?.pagespeed?.mobile?.score ?? 0) >= 80)
+    strengths.push("Fast mobile speed");
 
     if (!data.cart.checkoutButton)
         weaknesses.push("Checkout button missing");
