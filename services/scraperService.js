@@ -104,31 +104,25 @@ try {
     // Wait for Google PageSpeed
     //------------------------------------
 
-    let pagespeed;
+    let pagespeed = {
+  success: false,
+  mobile: { score: 0 },
+  desktop: { score: 0 },
+};
 
-    try {
-      if (!pagespeed.mobile) {
-        pagespeed.mobile = {
-          score: 0,
-          metrics: {},
-          opportunities: [],
-        };
-      }
+try {
+  const result = await pageSpeedCheck(url);
 
-      if (!pagespeed.desktop) {
-        pagespeed.desktop = {
-          score: 0,
-          metrics: {},
-          opportunities: [],
-        };
-      }
-    } catch (err) {
-      pagespeed = {
-        success: false,
-
-        error: err.message,
-      };
-    }
+  if (result) {
+    pagespeed = {
+      success: true,
+      mobile: result.mobile || { score: 0 },
+      desktop: result.desktop || { score: 0 },
+    };
+  }
+} catch (err) {
+  pagespeed.error = err.message;
+}
 
     //------------------------------------
     // SCORE ENGINE
